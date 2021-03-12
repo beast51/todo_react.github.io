@@ -1,6 +1,7 @@
 import React from "react";
 import "./App.css";
 import Items from "./Components/Items";
+import Input from "./Components/Input";
 
 class App extends React.Component {
   constructor(props) {
@@ -9,21 +10,39 @@ class App extends React.Component {
       todoList: [],
       inputValue: "",
     };
-    this.state.todoList = JSON.parse(localStorage.getItem("todoList") || '[]');
+    this.state.todoList = JSON.parse(localStorage.getItem("todoList") || "[]");
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.todoList !== this.state.todoList){
-      localStorage.setItem('todoList', JSON.stringify(this.state.todoList))
+    if (prevState.todoList !== this.state.todoList) {
+      localStorage.setItem("todoList", JSON.stringify(this.state.todoList));
     }
-    console.log('dsadsa')
+    console.log('render')
   }
 
-  inputTextChangeHandler = (event) => {
+  //Enter text on main input
+  mainInputTextChange = (event) => {
     this.setState({ inputValue: event.target.value });
   };
 
-  checkboxHandler = (id) => {
+  //Add element Todo
+  addTodo = (text) => {
+      this.setState({
+        todoList: [
+          ...this.state.todoList,
+          {
+            id: Date.now(),
+            text: text,
+            completed: false,
+            edit: false,
+          },
+        ],
+      });
+  };
+
+  //Change checkbox
+  checkboxToggle = (id) => {
+    console.log('id', id)
     this.state.todoList.forEach((elem) => {
       if (elem.id === id) {
         elem.completed = !elem.completed;
@@ -34,31 +53,15 @@ class App extends React.Component {
     });
   };
 
-  keyDownHandler = (event) => {
-    if (event.key === "Enter" && this.state.inputValue.trim() !== '') {
-      this.setState({
-        todoList: [
-          ...this.state.todoList,
-          {
-            id: Date.now(),
-            text: this.state.inputValue,
-            completed: false,
-            edit: false
-          },
-        ],
-      });
-      this.setState({ inputValue: "" });
-      console.log(this.state);
-    }
-  };
-
-  deleteHandler = (id) => {
+  //Delete Todo elemet
+  deleteItem = (id) => () => {
     this.setState({
       todoList: [...this.state.todoList.filter((elem) => elem.id !== id)],
     });
   };
 
-  editModeHandler = (id) => {
+  //Show / Hide input for edit element todo on Double Click
+  itemEditModeToggleOnDblClick = (id) => () => {
     this.state.todoList.forEach((elem) => {
       if (elem.id === id) {
         elem.edit = !elem.edit;
@@ -67,44 +70,38 @@ class App extends React.Component {
         });
       }
     });
-  }
+  };
 
-  itemInputChangeHandler = (id, event) => {
+  //Edit text in element Todo
+  itemInputChangeText = (id) => (text) => {
     this.state.todoList.forEach((elem) => {
-      if (elem.id === id) {
-        elem.text = event.target.value;
-        this.setState({
-          todoList: [...this.state.todoList],
-        });
-      }
-    });
-  }
-
-  itemInputEditModeChangeHandler = (event, id, text) => {
-    if (event.key === "Enter" && text.trim() !== '') {
-      this.state.todoList.forEach((elem) => {
-        console.log(elem.edit)
-        if (elem.id === id) {
+      if (elem.id === id ) {
+        if (text.trim() !== '') {
+          elem.text = text;
+          elem.edit = !elem.edit;
+          this.setState({
+            todoList: [...this.state.todoList],
+          });
+        } else {
           elem.edit = !elem.edit;
           this.setState({
             todoList: [...this.state.todoList],
           });
         }
-      });
-    }
-  }
+ 
+      } 
+    });
+  };
 
   render() {
     return (
       <div className="todo">
         <h1>Todo</h1>
-        <input
+        <Input
           className="todo__input"
-          type="text"
           placeholder="Введите название дела"
-          value={this.state.inputValue}
-          onChange={this.inputTextChangeHandler}
-          onKeyDown={this.keyDownHandler}
+          onChange={this.mainInputTextChange}
+          onEnter={this.addTodo}
         />
         <p className="todo-out__title">
           {this.state.todoList.length > 0
@@ -113,11 +110,10 @@ class App extends React.Component {
         </p>
         <Items
           todoList={this.state.todoList}
-          deleteHandler={this.deleteHandler}
-          checkboxHandler={this.checkboxHandler}
-          editModeHandler={this.editModeHandler}
-          itemInputChangeHandler={this.itemInputChangeHandler}
-          itemInputEditModeChangeHandler={this.itemInputEditModeChangeHandler}
+          deleteItem={this.deleteItem}
+          checkboxToggle={this.checkboxToggle}
+          itemEditModeToggleOnDblClick={this.itemEditModeToggleOnDblClick}
+          itemInputChangeText={this.itemInputChangeText}
         />
       </div>
     );
