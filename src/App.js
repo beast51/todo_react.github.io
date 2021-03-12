@@ -17,7 +17,6 @@ class App extends React.Component {
     if (prevState.todoList !== this.state.todoList) {
       localStorage.setItem("todoList", JSON.stringify(this.state.todoList));
     }
-    console.log('render')
   }
 
   //Enter text on main input
@@ -42,7 +41,6 @@ class App extends React.Component {
 
   //Change checkbox
   checkboxToggle = (id) => {
-    console.log('id', id)
     this.state.todoList.forEach((elem) => {
       if (elem.id === id) {
         elem.completed = !elem.completed;
